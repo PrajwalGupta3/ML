@@ -1,5 +1,5 @@
 
-# Transfer Learning for Image Classification with CNN and Supervised Models
+# 1)Transfer Learning for Image Classification with CNN and Supervised Models
 
 This project demonstrates a hybrid approach to image classification by combining deep learning with traditional machine learning. It leverages a pre-trained ResNet50 model to extract image features from the CIFAR-10 dataset and then uses various supervised classifiers—namely a Support Vector Machine (SVM), Random Forest, and XGBoost—to perform classification.
 
@@ -212,4 +212,175 @@ print(f"XGBoost Test Accuracy: {test_acc * 100:.2f}%")
 
 ## Conclusion
   This approach while might not give high accuracy(due to small size of dataset) , leads to lesser training time as compared to a full fledged DNN or CNN. Furthermore, if accuracy can by compromised further , the RandomForest reduces the training time by more than half.XGBoost on the other hand gave a more balanced approach of balncing accuracy and training time(compared to other 2 models). If you are an ML enthusiast too, who learned something useful from this repo, please feel free to experiment further with it , by hyperparameter tuning, trying more such differnt approaches. If you do come up with some ,please feel to reach out to me and tell me about it, as it would lead me to learning new concepts and broaden my horizen.
+
+
+
+
+
+
+# 2) Running the model on local device
+
+
+## Overview
+
+In this project, we:
+1. **Load a pre-trained SVM model** (saved as `my_svm_model.pkl`).
+2. **Use ResNet50** (pre-trained on ImageNet) as a feature extractor without modifying its final layer, so that its output is a 1000-dimensional feature vector.
+3. **Define a function** to process an image: resize, convert it to a tensor, and extract features.
+4. **Map the predicted class index** (from CIFAR-10) to a human-readable class name.
+5. **Display the image** along with its predicted label.
+
+*Analogy:* Imagine using a master chef’s secret recipe (the SVM model) that was perfected using high-quality ingredients (features from ResNet50). You then take a new ingredient (the input image), process it, and the recipe tells you exactly what dish (class) it is!
+
+## Code Breakdown
+
+### 1. Importing Libraries
+
+```python
+import torch
+import torchvision.transforms as transforms
+from PIL import Image
+import numpy as np
+import joblib
+from torchvision.models import resnet50
+import matplotlib.pyplot as plt
+```
+
+- **torch & torchvision:** Provide deep learning tools and utilities.
+- **PIL (Python Imaging Library):** Used for image processing.
+- **numpy:** Handles numerical operations.
+- **joblib:** Loads the pre-trained SVM model.
+- **matplotlib:** Displays the image with prediction.
+
+*Analogy:* Think of these as your kitchen appliances and utensils needed to prepare and serve a dish.
+
+### 2. Loading the Trained SVM Model
+
+```python
+svm = joblib.load("my_svm_model.pkl")
+```
+
+- This loads the SVM model that was trained earlier using ResNet features.
   
+*Analogy:* Like retrieving a secret family recipe that has been stored safely, ready to be used to identify a dish.
+
+### 3. Loading ResNet50 for Feature Extraction
+
+```python
+model = resnet50(pretrained=True)
+model.eval()
+```
+
+- **resnet50(pretrained=True):** Loads the ResNet50 model with weights pre-trained on ImageNet.
+- **model.eval():** Puts the model in evaluation mode (disables training behaviors like dropout).
+
+*Analogy:* This step is like using a proven cookbook from a master chef whose techniques are trusted and tested.
+
+### 4. Defining the Feature Extraction Function
+
+```python
+def extract_features_from_image(image_path):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),  # Resize to match ResNet input
+        transforms.ToTensor(),          # Convert image to tensor
+    ])
+
+    image = Image.open(image_path).convert("RGB")  # Open image
+    image = transform(image).unsqueeze(0)  # Add batch dimension
+
+    with torch.no_grad():
+        features = model(image)  # Extract features using ResNet50
+
+    return features.squeeze().numpy().reshape(1, -1)  # Convert to 2D array
+```
+
+- **Transformation:** Resizes the image to 224×224 pixels and converts it into a tensor.
+- **Image Loading:** Opens and converts the image to RGB.
+- **Batch Dimension:** Adds an extra dimension because PyTorch models expect a batch of images.
+- **Feature Extraction:** Passes the image through ResNet50 to get a feature vector.
+- **Reshaping:** Converts the output into a 2D array suitable for the SVM.
+
+*Analogy:* Imagine taking a high-resolution photo, resizing it to a standard format, and then using a filter to extract only the most important details.
+
+### 5. Mapping Class Indices to Names
+
+```python
+cifar10_classes = {
+    0: "airplane",
+    1: "automobile",
+    2: "bird",
+    3: "cat",
+    4: "deer",
+    5: "dog",
+    6: "frog",
+    7: "horse",
+    8: "ship",
+    9: "truck"
+}
+```
+
+- This dictionary maps numeric class indices (0–9) to human-readable labels based on the CIFAR-10 dataset.
+
+*Analogy:* Like a legend on a treasure map, where each symbol corresponds to a specific landmark or treasure.
+
+### 6. Processing the Image & Making a Prediction
+
+```python
+image_path = "/content/car1.jpeg"
+image_features = extract_features_from_image(image_path)
+prediction = svm.predict(image_features)
+predicted_index = prediction[0]
+predicted_class = cifar10_classes.get(predicted_index, "Unknown")
+
+print("Predicted class:", predicted_class)
+```
+
+- **Image Path:** Specifies the file path of the image to classify.
+- **Feature Extraction:** Extracts features from the image using the defined function.
+- **Prediction:** The SVM model predicts the class index.
+- **Mapping:** Converts the predicted index into a class name using the dictionary.
+- **Output:** Prints the predicted class.
+
+*Analogy:* Like feeding ingredients into a machine that tells you what dish you have based on a secret recipe.
+
+### 7. Displaying the Image with Prediction
+
+```python
+image = Image.open(image_path).convert("RGB")
+plt.imshow(image)
+plt.title("Predicted: " + predicted_class)
+plt.axis('off')
+plt.show()
+```
+
+- **Image Loading:** Reopens the image for display.
+- **Display:** Uses Matplotlib to display the image with the predicted class as the title.
+- **Formatting:** Turns off axis labels for a cleaner view.
+
+*Analogy:* It’s like presenting your finished dish on a plate with a label that proudly shows its name.
+
+## How to Run the Code
+
+1. **Clone the Repository:**  
+   Clone this repository to your local machine.
+
+2. **Install Dependencies:**  
+   Ensure you have the required libraries installed:
+   ```bash
+   pip install torch torchvision pillow numpy joblib matplotlib
+   ```
+
+3. **Place the Necessary Files:**  
+   - Make sure `my_svm_model.pkl` (the trained SVM model) is in the repository directory.
+   - Update `image_path` in the code with the path to the image you want to classify.
+
+4. **Run the Script:**  
+   Execute the script using Python:
+   ```bash
+   python your_script.py
+   ```
+   The code will print the predicted class and display the image with its predicted label.
+
+## Conclusion
+
+This project illustrates a practical application of transfer learning by using a pre-trained ResNet50 model to extract features and an SVM model to classify a single image. By combining deep learning and traditional machine learning techniques, you can build efficient and modular image classification systems. This approach not only helps in understanding both methodologies but also provides flexibility in experimenting with different models.
