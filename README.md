@@ -43,6 +43,10 @@ The project uses the **CIFAR-10 dataset**, which is a widely used collection of 
 - **SVM Advantages:**
   - **High-Dimensional Data Handling:** After feature extraction, the resulting data is high-dimensional. SVMs are known to work well in such spaces.
   - **Robustness:** SVMs can generalize well, especially on smaller to medium-sized datasets.
+  
+  **Additional Classifiers:
+      Random Forest: Provides an ensemble method that aggregates multiple decision trees.
+      XGBoost: A gradient boosting method known for its performance and speed.
  
     
 
@@ -207,5 +211,5 @@ print(f"XGBoost Test Accuracy: {test_acc * 100:.2f}%")
    Open the notebook (or Python script) and run each cell sequentially. The notebook will download the CIFAR-10 dataset, extract features using ResNet50, train classifiers, and display performance metrics.
 
 ## Conclusion
-  This approach while might not give high accuracy(due to small size of dataset) , leads to lesser training time as compared to a full fledged DNN or CNN. Furthermore, if accuracy can by compromised further , the RandomForest reduces the training time by more than half. If you are an ML enthusiast too, who learned something useful from this repo, please feel free to experiment further with it , by hyperparameter tuning, trying more such differnt approaches. If you do come up with some ,please feel to reach out to me and tell me about it, as it would lead me to learning new concepts and broaden my horizen.
+  This approach while might not give high accuracy(due to small size of dataset) , leads to lesser training time as compared to a full fledged DNN or CNN. Furthermore, if accuracy can by compromised further , the RandomForest reduces the training time by more than half.XGBoost on the other hand gave a more balanced approach of balncing accuracy and training time(compared to other 2 models). If you are an ML enthusiast too, who learned something useful from this repo, please feel free to experiment further with it , by hyperparameter tuning, trying more such differnt approaches. If you do come up with some ,please feel to reach out to me and tell me about it, as it would lead me to learning new concepts and broaden my horizen.
   
